@@ -37,7 +37,6 @@
     "language-configuration.json",
     "media/**",
     "syntaxes/**",
-    "scripts/**",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
