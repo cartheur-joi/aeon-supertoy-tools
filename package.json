@@ -30,7 +30,7 @@
     "color": "#0f172a",
     "theme": "dark"
   },
-  "icon": "icon.jpg",
+  "icon": "media/icon.png",
   "main": "./extension.js",
   "files": [
     "extension.js",
@@ -40,8 +40,7 @@
     "scripts/**",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE",
-    "icon.jpg"
+    "LICENSE"
   ],
   "scripts": {
     "package": "vsce package",
