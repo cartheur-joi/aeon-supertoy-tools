@@ -1,11 +1,8 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="aeonGlow" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#27F6A7"/>
-      <stop offset="1" stop-color="#1B6346"/>
-    </linearGradient>
-  </defs>
-  <circle cx="12" cy="12" r="10" fill="#121413"/>
-  <path d="M12 4.5L5.8 18.5H8.6L10 15.2H14L15.4 18.5H18.2L12 4.5ZM11.1 12.9L12 10.7L12.9 12.9H11.1Z" fill="url(#aeonGlow)"/>
-  <circle cx="12" cy="12" r="9.2" stroke="#22BD82" stroke-opacity="0.65" stroke-width="0.8"/>
+  <g stroke="#22BD82" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8.6" opacity="0.85"/>
+    <path d="M12 6.2L7.5 17.8"/>
+    <path d="M12 6.2L16.5 17.8"/>
+    <path d="M8.9 14.1H15.1"/>
+  </g>
 </svg>
