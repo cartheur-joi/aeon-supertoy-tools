@@ -1,33 +1,43 @@
-# AEON Supertoy Tools (VS Code)
+# AEON Supertoy Tools
 
-Local VS Code extension scaffold for `.aeon` files.
+VS Code extension for `.aeon` files.
 
 ## Features
 
-- `aeon` language registration for `*.aeon`
-- syntax highlighting via TextMate grammar
-- AEON validation diagnostics powered by `scripts/aeonlint.sh`
-- commands:
+- Language registration for `*.aeon`
+- Syntax highlighting via TextMate grammar
+- Optional validation commands:
   - `AEON: Validate Current File`
   - `AEON: Validate Workspace`
-- save-time validation toggle:
-  - setting: `aeon.validateOnSave` (default: `true`)
+- Save-time validation toggle:
+  - `aeon.validateOnSave` (default: `true`)
 
-## Validation Modes
+## Validation Integration
 
-- strict mode (`--strict`) is used for:
-  - `interactive-toys/personality/production/*.aeon`
-- basic mode (`--basic`) is used for all other `.aeon` files.
+Validation is optional and requires an `aeonlint` shell script at:
 
-## Run In Development Host
+- `<workspace>/scripts/aeonlint.sh`, or
+- `<extension>/scripts/aeonlint.sh`
 
-1. Open this folder in VS Code:
-   - `vscode-aeon-supertoy`
+If no script is found, validation is skipped and syntax highlighting still works.
+
+Validation mode selection:
+
+- `--strict` for paths containing `interactive-toys/personality/production/`
+- `--basic` for all other `.aeon` files
+
+## Local Development
+
+1. Open this extension folder in VS Code.
 2. Press `F5` to launch an Extension Development Host.
-3. In the host window, open the main repository and open any `.aeon` file.
-4. Run `AEON: Validate Current File` from Command Palette, or save to trigger validation.
+3. Open a project containing `.aeon` files.
+4. Run `AEON: Validate Current File` or save a file.
 
-## Notes
+## Publish
 
-- This scaffold runs `bash` and expects `scripts/aeonlint.sh` in the repo root.
-- It is designed for local/Linux workflows used by this project.
+```bash
+npm i -g @vscode/vsce
+vsce login cartheur
+vsce package
+vsce publish
+```

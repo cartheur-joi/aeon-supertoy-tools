@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const DIAGNOSTIC_OWNER = "aeonlint";
+let missingLintScriptWarned = false;
 
 function isAeonDocument(doc) {
   return doc && doc.languageId === "aeon" && doc.uri && doc.uri.scheme === "file";
@@ -49,13 +50,29 @@ function parseAeoLintErrors(output, targetFile) {
   return diagnostics;
 }
 
-function runAeoLint(workspaceRoot, modeFlag, targetPath) {
+function findLintScript(workspaceRoot, extensionRoot) {
+  const candidatePaths = [
+    path.join(workspaceRoot, "scripts", "aeonlint.sh"),
+    path.join(extensionRoot, "scripts", "aeonlint.sh")
+  ];
+
+  for (const scriptPath of candidatePaths) {
+    if (fs.existsSync(scriptPath)) {
+      return scriptPath;
+    }
+  }
+
+  return null;
+}
+
+function runAeoLint(workspaceRoot, extensionRoot, modeFlag, targetPath) {
   return new Promise((resolve) => {
-    const scriptPath = path.join(workspaceRoot, "scripts", "aeonlint.sh");
-    if (!fs.existsSync(scriptPath)) {
+    const scriptPath = findLintScript(workspaceRoot, extensionRoot);
+    if (!scriptPath) {
       resolve({
-        exitCode: 2,
-        output: `ERROR: aeonlint script not found: ${scriptPath}`
+        exitCode: 0,
+        skipped: true,
+        output: "AEON validation skipped: scripts/aeonlint.sh was not found in the workspace or extension."
       });
       return;
     }
@@ -81,7 +98,7 @@ function runAeoLint(workspaceRoot, modeFlag, targetPath) {
   });
 }
 
-async function validateOneFile(document, diagnosticsCollection, showMessageOnSuccess = false) {
+async function validateOneFile(document, diagnosticsCollection, extensionRoot, showMessageOnSuccess = false) {
   if (!isAeonDocument(document)) {
     return;
   }
@@ -94,7 +111,16 @@ async function validateOneFile(document, diagnosticsCollection, showMessageOnSuc
   }
 
   const modeFlag = lintModeForPath(targetPath);
-  const result = await runAeoLint(workspaceRoot, modeFlag, targetPath);
+  const result = await runAeoLint(workspaceRoot, extensionRoot, modeFlag, targetPath);
+
+  if (result.skipped) {
+    diagnosticsCollection.delete(document.uri);
+    if (!missingLintScriptWarned) {
+      missingLintScriptWarned = true;
+      vscode.window.showWarningMessage(result.output);
+    }
+    return;
+  }
 
   if (result.exitCode === 0) {
     diagnosticsCollection.delete(document.uri);
@@ -121,7 +147,7 @@ async function validateOneFile(document, diagnosticsCollection, showMessageOnSuc
   }
 }
 
-async function validateWorkspace(diagnosticsCollection) {
+async function validateWorkspace(diagnosticsCollection, extensionRoot) {
   const files = await vscode.workspace.findFiles(
     "**/*.aeon",
     "**/{.git,bin,obj,node_modules}/**"
@@ -135,7 +161,7 @@ async function validateWorkspace(diagnosticsCollection) {
       continue;
     }
     checked += 1;
-    await validateOneFile(doc, diagnosticsCollection, false);
+    await validateOneFile(doc, diagnosticsCollection, extensionRoot, false);
     const after = diagnosticsCollection.get(uri);
     if (after && after.length > 0) {
       failed += 1;
@@ -151,6 +177,7 @@ async function validateWorkspace(diagnosticsCollection) {
 
 function activate(context) {
   const diagnosticsCollection = vscode.languages.createDiagnosticCollection(DIAGNOSTIC_OWNER);
+  const extensionRoot = context.extensionPath;
   context.subscriptions.push(diagnosticsCollection);
 
   context.subscriptions.push(
@@ -160,13 +187,13 @@ function activate(context) {
         vscode.window.showInformationMessage("AEON: open an .aeon file to validate.");
         return;
       }
-      await validateOneFile(editor.document, diagnosticsCollection, true);
+      await validateOneFile(editor.document, diagnosticsCollection, extensionRoot, true);
     })
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("aeon.validateWorkspace", async () => {
-      await validateWorkspace(diagnosticsCollection);
+      await validateWorkspace(diagnosticsCollection, extensionRoot);
     })
   );
 
@@ -176,7 +203,7 @@ function activate(context) {
       if (!enabled || !isAeonDocument(document)) {
         return;
       }
-      await validateOneFile(document, diagnosticsCollection, false);
+      await validateOneFile(document, diagnosticsCollection, extensionRoot, false);
     })
   );
 }

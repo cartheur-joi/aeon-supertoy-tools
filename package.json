@@ -1,17 +1,51 @@
 {
   "name": "aeon-supertoy-tools",
   "displayName": "AEON Supertoy Tools",
-  "description": "Syntax highlighting and validation for Cartheur AEON files.",
+  "description": "Syntax highlighting for AEON files, with optional aeonlint integration.",
   "version": "0.1.0",
-  "publisher": "cartheur-local",
+  "publisher": "cartheur",
   "engines": {
     "vscode": "^1.84.0"
   },
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cartheur-joi/aeon-supertoy-tools.git"
+  },
+  "homepage": "https://github.com/cartheur-joi/aeon-supertoy-tools#readme",
+  "bugs": {
+    "url": "https://github.com/cartheur-joi/aeon-supertoy-tools/issues"
+  },
+  "keywords": [
+    "aeon",
+    "syntax",
+    "grammar",
+    "linter"
+  ],
   "categories": [
     "Programming Languages",
     "Linters"
   ],
+  "galleryBanner": {
+    "color": "#0f172a",
+    "theme": "dark"
+  },
+  "icon": "icon.jpg",
   "main": "./extension.js",
+  "files": [
+    "extension.js",
+    "language-configuration.json",
+    "syntaxes/**",
+    "scripts/**",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "icon.jpg"
+  ],
+  "scripts": {
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
   "activationEvents": [
     "onLanguage:aeon",
     "onCommand:aeon.validateCurrentFile",
