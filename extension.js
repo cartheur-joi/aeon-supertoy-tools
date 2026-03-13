@@ -5,6 +5,7 @@ const path = require("path");
 
 const DIAGNOSTIC_OWNER = "aeonlint";
 let missingLintScriptWarned = false;
+const AEON_VIEW_ID = "aeonExplorer";
 
 function isAeonDocument(doc) {
   return doc && doc.languageId === "aeon" && doc.uri && doc.uri.scheme === "file";
@@ -175,10 +176,66 @@ async function validateWorkspace(diagnosticsCollection, extensionRoot) {
   }
 }
 
+class AeonSidebarProvider {
+  constructor() {
+    this._emitter = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this._emitter.event;
+  }
+
+  refresh() {
+    this._emitter.fire(undefined);
+  }
+
+  getTreeItem(element) {
+    return element;
+  }
+
+  getChildren() {
+    const items = [];
+
+    const validateCurrent = new vscode.TreeItem("Validate Current File", vscode.TreeItemCollapsibleState.None);
+    validateCurrent.command = {
+      command: "aeon.validateCurrentFile",
+      title: "Validate Current File"
+    };
+    validateCurrent.tooltip = "Run aeonlint for the active .aeon file.";
+    validateCurrent.iconPath = new vscode.ThemeIcon("check");
+    items.push(validateCurrent);
+
+    const validateWorkspaceItem = new vscode.TreeItem("Validate Workspace", vscode.TreeItemCollapsibleState.None);
+    validateWorkspaceItem.command = {
+      command: "aeon.validateWorkspace",
+      title: "Validate Workspace"
+    };
+    validateWorkspaceItem.tooltip = "Run aeonlint for all .aeon files in this workspace.";
+    validateWorkspaceItem.iconPath = new vscode.ThemeIcon("files");
+    items.push(validateWorkspaceItem);
+
+    const onSaveEnabled = vscode.workspace.getConfiguration().get("aeon.validateOnSave", true);
+    const toggleSaveValidation = new vscode.TreeItem(
+      `Validate On Save: ${onSaveEnabled ? "On" : "Off"}`,
+      vscode.TreeItemCollapsibleState.None
+    );
+    toggleSaveValidation.command = {
+      command: "aeon.toggleValidateOnSave",
+      title: "Toggle Validate On Save"
+    };
+    toggleSaveValidation.tooltip = "Toggle aeon.validateOnSave.";
+    toggleSaveValidation.iconPath = new vscode.ThemeIcon(onSaveEnabled ? "pass-filled" : "circle-slash");
+    items.push(toggleSaveValidation);
+
+    return items;
+  }
+}
+
 function activate(context) {
   const diagnosticsCollection = vscode.languages.createDiagnosticCollection(DIAGNOSTIC_OWNER);
   const extensionRoot = context.extensionPath;
+  const sidebarProvider = new AeonSidebarProvider();
   context.subscriptions.push(diagnosticsCollection);
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(AEON_VIEW_ID, sidebarProvider)
+  );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("aeon.validateCurrentFile", async () => {
@@ -194,6 +251,24 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand("aeon.validateWorkspace", async () => {
       await validateWorkspace(diagnosticsCollection, extensionRoot);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("aeon.toggleValidateOnSave", async () => {
+      const config = vscode.workspace.getConfiguration();
+      const current = config.get("aeon.validateOnSave", true);
+      await config.update("aeon.validateOnSave", !current, vscode.ConfigurationTarget.Global);
+      vscode.window.showInformationMessage(`AEON: validate on save ${!current ? "enabled" : "disabled"}.`);
+      sidebarProvider.refresh();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("aeon.validateOnSave")) {
+        sidebarProvider.refresh();
+      }
     })
   );
 

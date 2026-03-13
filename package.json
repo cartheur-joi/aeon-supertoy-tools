@@ -35,6 +35,7 @@
   "files": [
     "extension.js",
     "language-configuration.json",
+    "media/**",
     "syntaxes/**",
     "scripts/**",
     "README.md",
@@ -48,10 +49,29 @@
   },
   "activationEvents": [
     "onLanguage:aeon",
+    "onView:aeonExplorer",
     "onCommand:aeon.validateCurrentFile",
-    "onCommand:aeon.validateWorkspace"
+    "onCommand:aeon.validateWorkspace",
+    "onCommand:aeon.toggleValidateOnSave"
   ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aeonSidebar",
+          "title": "AEON",
+          "icon": "media/aeon-activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "aeonSidebar": [
+        {
+          "id": "aeonExplorer",
+          "name": "AEON Tools"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "aeon",
@@ -80,6 +100,10 @@
       {
         "command": "aeon.validateWorkspace",
         "title": "AEON: Validate Workspace"
+      },
+      {
+        "command": "aeon.toggleValidateOnSave",
+        "title": "AEON: Toggle Validate On Save"
       }
     ],
     "configuration": {

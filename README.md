@@ -6,6 +6,7 @@ VS Code extension for `.aeon` files.
 
 - Language registration for `*.aeon`
 - Syntax highlighting via TextMate grammar
+- Activity Bar entry (`AEON`) with quick tools in a sidebar view
 - Optional validation commands:
   - `AEON: Validate Current File`
   - `AEON: Validate Workspace`
