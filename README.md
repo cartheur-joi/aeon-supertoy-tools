@@ -41,3 +41,14 @@ vsce login cartheur
 vsce package
 vsce publish
 ```
+
+## Packaging Artifact (`.vsix`)
+
+The file `aeon-supertoy-tools-<version>.vsix` is a generated build artifact.
+It is intentionally excluded from git and may be removed during repo cleanup.
+
+Recreate it any time from the repo root:
+
+```bash
+npx -y @vscode/vsce@2.24.0 package
+```
