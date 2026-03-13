@@ -1,0 +1,62 @@
+{
+  "name": "aeon-supertoy-tools",
+  "displayName": "AEON Supertoy Tools",
+  "description": "Syntax highlighting and validation for Cartheur AEON files.",
+  "version": "0.1.0",
+  "publisher": "cartheur-local",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:aeon",
+    "onCommand:aeon.validateCurrentFile",
+    "onCommand:aeon.validateWorkspace"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "aeon",
+        "aliases": [
+          "AEON",
+          "aeon"
+        ],
+        "extensions": [
+          ".aeon"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "aeon",
+        "scopeName": "source.aeon",
+        "path": "./syntaxes/aeon.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "aeon.validateCurrentFile",
+        "title": "AEON: Validate Current File"
+      },
+      {
+        "command": "aeon.validateWorkspace",
+        "title": "AEON: Validate Workspace"
+      }
+    ],
+    "configuration": {
+      "title": "AEON",
+      "properties": {
+        "aeon.validateOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run aeonlint for .aeon files when saved."
+        }
+      }
+    }
+  }
+}

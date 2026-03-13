@@ -1,0 +1,65 @@
+{
+  "name": "AEON",
+  "scopeName": "source.aeon",
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#aeon-tag"
+    },
+    {
+      "include": "#generic-tag"
+    },
+    {
+      "include": "#entity"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.block.aeon",
+          "begin": "<!--",
+          "end": "-->"
+        }
+      ]
+    },
+    "aeon-tag": {
+      "patterns": [
+        {
+          "name": "entity.name.tag.aeon",
+          "match": "</?(aeon|category|topic|pattern|template|random|li|think|set|get|srai|condition|star|that|bot|person|formal|map|id|date|version|learn)\\b"
+        }
+      ]
+    },
+    "generic-tag": {
+      "patterns": [
+        {
+          "name": "meta.tag.aeon",
+          "begin": "<\\/?",
+          "end": "/?>",
+          "patterns": [
+            {
+              "name": "entity.other.attribute-name.aeon",
+              "match": "\\b[a-zA-Z_:-][a-zA-Z0-9_:\\-\\.]*\\b(?=\\=)"
+            },
+            {
+              "name": "string.quoted.double.aeon",
+              "begin": "\"",
+              "end": "\""
+            }
+          ]
+        }
+      ]
+    },
+    "entity": {
+      "patterns": [
+        {
+          "name": "constant.character.entity.aeon",
+          "match": "&[A-Za-z0-9#]+;"
+        }
+      ]
+    }
+  }
+}
