@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Removed maintainer-only publish/packaging instructions from Marketplace-visible `README.md`.
 - Added `DEVELOPMENT.md` for internal release workflow notes.
+- Added `.vscodeignore` rules to exclude internal docs and local artifacts from the published package.
 - Optimized workspace validation by linting discovered `.aeon` file URIs directly (no document open per file).
 - Updated `AEON: Toggle Validate On Save` to write setting at workspace scope when a workspace is open (falls back to global otherwise).
 
