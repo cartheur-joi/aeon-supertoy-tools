@@ -12,6 +12,7 @@ VS Code extension for `.aeon` files.
   - `AEON: Validate Workspace`
 - Save-time validation toggle:
   - `aeon.validateOnSave` (default: `true`)
+  - The toggle command updates workspace settings when a workspace is open.
 
 ## Validation Integration
 
@@ -33,23 +34,3 @@ Validation mode selection:
 2. Press `F5` to launch an Extension Development Host.
 3. Open a project containing `.aeon` files.
 4. Run `AEON: Validate Current File` or save a file.
-
-## Publish
-
-```bash
-npm i -g @vscode/vsce
-vsce login cartheur
-vsce package
-vsce publish
-```
-
-## Packaging Artifact (`.vsix`)
-
-The file `aeon-supertoy-tools-<version>.vsix` is a generated build artifact.
-It is intentionally excluded from git and may be removed during repo cleanup.
-
-Recreate it any time from the repo root:
-
-```bash
-npx -y @vscode/vsce@2.24.0 package
-```

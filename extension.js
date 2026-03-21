@@ -7,8 +7,12 @@ const DIAGNOSTIC_OWNER = "aeonlint";
 let missingLintScriptWarned = false;
 const AEON_VIEW_ID = "aeonExplorer";
 
+function isAeonUri(uri) {
+  return uri && uri.scheme === "file" && uri.fsPath.toLowerCase().endsWith(".aeon");
+}
+
 function isAeonDocument(doc) {
-  return doc && doc.languageId === "aeon" && doc.uri && doc.uri.scheme === "file";
+  return doc && doc.languageId === "aeon" && isAeonUri(doc.uri);
 }
 
 function getWorkspaceFolderForFile(filePath) {
@@ -99,12 +103,12 @@ function runAeoLint(workspaceRoot, extensionRoot, modeFlag, targetPath) {
   });
 }
 
-async function validateOneFile(document, diagnosticsCollection, extensionRoot, showMessageOnSuccess = false) {
-  if (!isAeonDocument(document)) {
+async function validateOneFile(uri, diagnosticsCollection, extensionRoot, showMessageOnSuccess = false) {
+  if (!isAeonUri(uri)) {
     return;
   }
 
-  const targetPath = document.uri.fsPath;
+  const targetPath = uri.fsPath;
   const workspaceRoot = getWorkspaceFolderForFile(targetPath);
   if (!workspaceRoot) {
     vscode.window.showWarningMessage("AEON: no workspace root found for validation.");
@@ -115,7 +119,7 @@ async function validateOneFile(document, diagnosticsCollection, extensionRoot, s
   const result = await runAeoLint(workspaceRoot, extensionRoot, modeFlag, targetPath);
 
   if (result.skipped) {
-    diagnosticsCollection.delete(document.uri);
+    diagnosticsCollection.delete(uri);
     if (!missingLintScriptWarned) {
       missingLintScriptWarned = true;
       vscode.window.showWarningMessage(result.output);
@@ -124,7 +128,7 @@ async function validateOneFile(document, diagnosticsCollection, extensionRoot, s
   }
 
   if (result.exitCode === 0) {
-    diagnosticsCollection.delete(document.uri);
+    diagnosticsCollection.delete(uri);
     if (showMessageOnSuccess) {
       vscode.window.showInformationMessage("AEON: file validation passed.");
     }
@@ -142,7 +146,7 @@ async function validateOneFile(document, diagnosticsCollection, extensionRoot, s
     );
   }
 
-  diagnosticsCollection.set(document.uri, diagnostics);
+  diagnosticsCollection.set(uri, diagnostics);
   if (showMessageOnSuccess) {
     vscode.window.showErrorMessage("AEON: file validation failed. See Problems panel.");
   }
@@ -157,12 +161,11 @@ async function validateWorkspace(diagnosticsCollection, extensionRoot) {
   let failed = 0;
 
   for (const uri of files) {
-    const doc = await vscode.workspace.openTextDocument(uri);
-    if (!isAeonDocument(doc)) {
+    if (!isAeonUri(uri)) {
       continue;
     }
     checked += 1;
-    await validateOneFile(doc, diagnosticsCollection, extensionRoot, false);
+    await validateOneFile(uri, diagnosticsCollection, extensionRoot, false);
     const after = diagnosticsCollection.get(uri);
     if (after && after.length > 0) {
       failed += 1;
@@ -244,7 +247,7 @@ function activate(context) {
         vscode.window.showInformationMessage("AEON: open an .aeon file to validate.");
         return;
       }
-      await validateOneFile(editor.document, diagnosticsCollection, extensionRoot, true);
+      await validateOneFile(editor.document.uri, diagnosticsCollection, extensionRoot, true);
     })
   );
 
@@ -258,7 +261,9 @@ function activate(context) {
     vscode.commands.registerCommand("aeon.toggleValidateOnSave", async () => {
       const config = vscode.workspace.getConfiguration();
       const current = config.get("aeon.validateOnSave", true);
-      await config.update("aeon.validateOnSave", !current, vscode.ConfigurationTarget.Global);
+      const hasWorkspace = Boolean(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length);
+      const target = hasWorkspace ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+      await config.update("aeon.validateOnSave", !current, target);
       vscode.window.showInformationMessage(`AEON: validate on save ${!current ? "enabled" : "disabled"}.`);
       sidebarProvider.refresh();
     })
@@ -278,7 +283,7 @@ function activate(context) {
       if (!enabled || !isAeonDocument(document)) {
         return;
       }
-      await validateOneFile(document, diagnosticsCollection, extensionRoot, false);
+      await validateOneFile(document.uri, diagnosticsCollection, extensionRoot, false);
     })
   );
 }
